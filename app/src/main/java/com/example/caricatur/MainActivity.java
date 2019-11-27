@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
             }
-        }  else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+        }  else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK && INTENT_TYPE == 2) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageBitmap(imageBitmap);
@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                INTENT_TYPE = 2;
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
@@ -137,10 +138,6 @@ public class MainActivity extends Activity {
         importFromGalleryButton.setOnClickListener(click ->  {
             getPicFromGallery();
         });
-        //galleryAddPic();
-
-
-        //galleryAddPic();
     }
 
     private void getPicFromGallery() {
