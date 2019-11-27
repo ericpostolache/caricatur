@@ -22,4 +22,14 @@
         android:onClick="takePicture"
         android:text="Take a picture!" />
 
+    <Button
+        android:id="@+id/button_image_from_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="-1dp"
+        android:onClick="takePicture"
+        android:text="Choose from gallery!" />
+
 </RelativeLayout>
