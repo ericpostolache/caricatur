@@ -1,34 +1,27 @@
 package com.example.caricatur;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.Manifest;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import androidx.core.content.FileProvider;
-
 
 
 public class MainActivity extends Activity {
@@ -36,28 +29,58 @@ public class MainActivity extends Activity {
     static int REQUEST_TAKE_PHOTO = 1;
     static int GALLERY_REQUEST_CODE = 1;
     static int INTENT_TYPE = 0;
-    private ImageView imageView;
+    public static Uri photoURI;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK && INTENT_TYPE == 1) {
-            try {
-                final Uri imageUri = data.getData();
-                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                imageView.setImageBitmap(selectedImage);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
-            }
+            final Uri imageUri = data.getData();
+            startNextActivity(imageUri);
         }  else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK && INTENT_TYPE == 2) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            imageView.setImageBitmap(imageBitmap);
+            if (photoURI == null) return;
+            startNextActivity(photoURI);
         } else {
             Toast.makeText(this, "You haven't picked an Image",Toast.LENGTH_LONG).show();
         }
+    }
+
+    /* starts ImageWorkActivity */
+    private void startNextActivity(Uri imageUri) {
+        try {
+            final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            String path = saveImageToInternalStorage(selectedImage);
+            Intent intent = new Intent(this, ImageWorkActivity.class);
+            Bundle extras = new Bundle();
+            extras.putString("path", path);
+            intent.putExtras(extras);
+            startActivity(intent);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /* saves image in internal storage to be taken in ImageWorkActivity */
+    private String saveImageToInternalStorage(Bitmap bitmapImage) {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        File mypath=new File(directory,"profile.jpg");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
     }
 
     String currentPhotoPath;
@@ -91,7 +114,7 @@ public class MainActivity extends Activity {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
+                photoURI = FileProvider.getUriForFile(this,
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -109,12 +132,6 @@ public class MainActivity extends Activity {
 //        this.sendBroadcast(mediaScanIntent);
 //    }
 
-
-
-
-
-    private final ThreadLocal<Button> takePictureButton = new ThreadLocal<Button>();
-
     private Button importFromGalleryButton;
     private Button takePicture;
 
@@ -130,11 +147,11 @@ public class MainActivity extends Activity {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
         }*/
-
-        imageView = (ImageView) findViewById(R.id.imageview);
         importFromGalleryButton = (Button) findViewById(R.id.button_image_from_gallery);
         takePicture = (Button) findViewById(R.id.button_image);
-        takePicture.setOnClickListener(click -> dispatchTakePictureIntent());
+        takePicture.setOnClickListener(click -> {
+            dispatchTakePictureIntent();
+        });
         importFromGalleryButton.setOnClickListener(click ->  {
             getPicFromGallery();
         });
@@ -144,7 +161,6 @@ public class MainActivity extends Activity {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         INTENT_TYPE = 1;
         photoPickerIntent.setType("image/*");
-        photoPickerIntent.setAction(Intent.ACTION_PICK);
         startActivityForResult(photoPickerIntent, GALLERY_REQUEST_CODE);
     }
 }
