@@ -5,7 +5,73 @@
     <ImageView
         android:id="@+id/imageview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/button_image"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="593dp"
+        android:layout_above="@+id/filterScrollView"
+        android:contentDescription="Time to caricaturize!"/>
+
+    <HorizontalScrollView
+        android:id="@+id/filterScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="102dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/filterHorizontalLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter1"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter2"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter3"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter4"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter5"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter6"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter7"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter8"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter9"/>
+            <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:id="@+id/filter10"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
 </RelativeLayout>
