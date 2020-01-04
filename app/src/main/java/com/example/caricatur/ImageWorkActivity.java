@@ -5,14 +5,24 @@ import android.app.Application;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 
@@ -75,6 +85,10 @@ public class ImageWorkActivity extends Activity {
         filterList.add(filter10);
 
 
+        if (this.getIntent() != null && this.getIntent().getExtras() != null) {
+            loadImageFromStorage((String) this.getIntent().getExtras().get("path"));
+        }
+
         for (int i = 0; i < 10; i++) {
             try {
                 filterList.get(i).setImageResource(R.drawable.image_filter);
@@ -87,10 +101,6 @@ public class ImageWorkActivity extends Activity {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-        }
-
-        if (this.getIntent() != null && this.getIntent().getExtras() != null) {
-            loadImageFromStorage((String) this.getIntent().getExtras().get("path"));
         }
 
     }
@@ -115,6 +125,7 @@ public class ImageWorkActivity extends Activity {
             Bitmap b = BitmapFactory.decodeStream(new FileInputStream(file));
             imageView.setImageBitmap(b);
             originalImageBitmap = b;
+            faceDetection(b);
 //            applyRandomFilter(b);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -146,5 +157,47 @@ public class ImageWorkActivity extends Activity {
         output = output.copy( Bitmap.Config.ARGB_8888 , true);
 
         return output;
+    }
+
+    private void faceDetection(Bitmap input) {
+
+        input = input.copy( Bitmap.Config.ARGB_8888 , true);
+
+        Paint myRectPaint = new Paint();
+        myRectPaint.setStrokeWidth(5);
+        myRectPaint.setColor(Color.RED);
+        myRectPaint.setStyle(Paint.Style.STROKE);
+
+        Bitmap tempBitmap = Bitmap.createBitmap(input.getWidth(), input.getHeight(),
+                Bitmap.Config.RGB_565);
+        Canvas tempCanvas = new Canvas(tempBitmap);
+        tempCanvas.drawBitmap(input, 0, 0, null);
+
+        FaceDetector faceDetector = new FaceDetector.Builder(getApplicationContext())
+                .setTrackingEnabled(false)
+                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                .setMode(FaceDetector.FAST_MODE)
+                .build();
+
+        if(!faceDetector.isOperational()) {
+            Toast.makeText(ImageWorkActivity.this, "Error detecting face",
+                    Toast.LENGTH_LONG).show();
+
+            return;
+        }
+
+        Frame frame = new Frame.Builder().setBitmap(input).build();
+        SparseArray<Face> faces = faceDetector.detect(frame);
+
+        for (int i = 0; i < faces.size(); i++) {
+            Face thisFace = faces.valueAt(i);
+            float x1 = thisFace.getPosition().x;
+            float y1 = thisFace.getPosition().y;
+            float x2 = x1 + thisFace.getWidth();
+            float y2 = y1 + thisFace.getHeight();
+            tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+
+        }
+        imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
     }
 }
