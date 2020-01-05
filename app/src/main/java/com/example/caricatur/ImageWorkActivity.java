@@ -10,8 +10,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,9 +25,11 @@ import androidx.appcompat.app.AlertDialog;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.gms.vision.face.Landmark;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -196,6 +200,11 @@ public class ImageWorkActivity extends Activity {
             float x2 = x1 + thisFace.getWidth();
             float y2 = y1 + thisFace.getHeight();
             tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+            ArrayList<Landmark> landmarks = new ArrayList<>(thisFace.getLandmarks());
+            for (Landmark l : landmarks) {
+                Log.d("IMG WORK ACTIVITY",FaceLandmarks.convert(l.getType()).toString() + " at " + l.getPosition());
+                /* Positions of facial features + Enum class */
+            }
 
         }
         imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
