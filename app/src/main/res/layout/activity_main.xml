@@ -1,27 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     >
 
-    <Button
-        android:id="@+id/button_image"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="-1dp"
-        android:onClick="takePicture"
-        android:text="Take a picture!" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+    >
 
-    <Button
-        android:id="@+id/button_image_from_gallery"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="-1dp"
-        android:onClick="takePicture"
-        android:text="Choose from gallery!" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textSize="50dp"
+            android:text="Caricatur App"
+            android:fontFamily="@font/earwig"
+            android:textColor="#000000"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="80dp"
+            />
+
+        <Button
+            android:id="@+id/button_image"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:onClick="takePicture"
+            android:text="Take a picture!"
+            android:drawableTop="@mipmap/add_photo"
+            android:background="@drawable/button1"
+            android:clickable="true"
+            android:paddingTop="5dp"
+            android:paddingBottom="10dp"
+            android:textSize="20dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <Button
+            android:id="@+id/button_image_from_gallery"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button1"
+            android:clickable="true"
+            android:drawableTop="@mipmap/photo_from_gallery"
+            android:onClick="takePicture"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="10dp"
+            android:text="Choose from gallery!"
+            android:textSize="20dp"
+            android:layout_gravity="center_horizontal"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
