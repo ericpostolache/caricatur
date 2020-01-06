@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
@@ -23,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.face.Contour;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.vision.face.Landmark;
@@ -39,8 +42,7 @@ import java.util.Random;
 
 public class ImageWorkActivity extends Activity {
 
-    static
-    {
+    static {
         System.loadLibrary("NativeImageProcessor");
     }
 
@@ -96,11 +98,11 @@ public class ImageWorkActivity extends Activity {
         for (int i = 0; i < 10; i++) {
             try {
                 filterList.get(i).setImageResource(R.drawable.image_filter);
-                filterList.get(i).setImageBitmap(applyRandomFilter(i+1));
+                filterList.get(i).setImageBitmap(applyRandomFilter(i + 1));
                 int finalI = i;
                 filterList.get(i).setOnClickListener(click -> {
                     imageView.setImageBitmap(originalImageBitmap);
-                    imageView.setImageBitmap(applyRandomFilterOnImage(finalI +1));
+                    imageView.setImageBitmap(applyRandomFilterOnImage(finalI + 1));
                 });
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -112,11 +114,11 @@ public class ImageWorkActivity extends Activity {
     private Bitmap applyRandomFilterOnImage(int i) {
         Bitmap input = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
-        input = input.copy( Bitmap.Config.ARGB_8888 , true);
+        input = input.copy(Bitmap.Config.ARGB_8888, true);
         filters = FilterPack.getFilterPack(getBaseContext());
         Filter filter = filters.get(i);
         Bitmap output = filter.processFilter(input);
-        output = output.copy( Bitmap.Config.ARGB_8888 , true);
+        output = output.copy(Bitmap.Config.ARGB_8888, true);
 
         return output;
     }
@@ -152,20 +154,20 @@ public class ImageWorkActivity extends Activity {
 
     /* applies a random filter from list */
     private Bitmap applyRandomFilter(int i) throws FileNotFoundException {
-        Bitmap input = ((BitmapDrawable) filterList.get(i-1).getDrawable()).getBitmap();
+        Bitmap input = ((BitmapDrawable) filterList.get(i - 1).getDrawable()).getBitmap();
 
-        input = input.copy( Bitmap.Config.ARGB_8888 , true);
+        input = input.copy(Bitmap.Config.ARGB_8888, true);
         filters = FilterPack.getFilterPack(getBaseContext());
         Filter filter = filters.get(i);
         Bitmap output = filter.processFilter(input);
-        output = output.copy( Bitmap.Config.ARGB_8888 , true);
+        output = output.copy(Bitmap.Config.ARGB_8888, true);
 
         return output;
     }
 
     private void faceDetection(Bitmap input) {
 
-        input = input.copy( Bitmap.Config.ARGB_8888 , true);
+        input = input.copy(Bitmap.Config.ARGB_8888, true);
 
         Paint myRectPaint = new Paint();
         myRectPaint.setStrokeWidth(5);
@@ -179,11 +181,11 @@ public class ImageWorkActivity extends Activity {
 
         FaceDetector faceDetector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
-                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
-                .setMode(FaceDetector.FAST_MODE)
+                .setLandmarkType(FaceDetector.CONTOUR_LANDMARKS)
+                .setMode(FaceDetector.SELFIE_MODE)
                 .build();
 
-        if(!faceDetector.isOperational()) {
+        if (!faceDetector.isOperational()) {
             Toast.makeText(ImageWorkActivity.this, "Error detecting face",
                     Toast.LENGTH_LONG).show();
 
@@ -201,12 +203,69 @@ public class ImageWorkActivity extends Activity {
             float y2 = y1 + thisFace.getHeight();
             tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
             ArrayList<Landmark> landmarks = new ArrayList<>(thisFace.getLandmarks());
-            for (Landmark l : landmarks) {
-                Log.d("IMG WORK ACTIVITY",FaceLandmarks.convert(l.getType()).toString() + " at " + l.getPosition());
-                /* Positions of facial features + Enum class */
+            ArrayList<Contour> contours = new ArrayList<>(thisFace.getContours());
+            Log.d("IMG WORK ACTIVITY", "Found this number of landmarks: " + landmarks.size());
+            Log.d("IMG WORK ACTIVITY", "Found this number of contours: " + contours.size());
+
+            for (Contour contour : contours) {
+                if (contour.getType() == Contour.LEFT_EYE) {
+                    imageView.setImageBitmap(adjustContourColor(contour));
+                }
+                if (contour.getType() == Contour.RIGHT_EYE) {
+                    imageView.setImageBitmap(adjustContourColor(contour));
+                }
             }
 
+//            for (Landmark l : landmarks) {
+//                int cx = (int) (l.getPosition().x * 1);
+//                int cy = (int) (l.getPosition().y * 1);
+//                //tempCanvas.drawCircle(cx, cy, 10, myRectPaint);
+//                Log.d("IMG WORK ACTIVITY", FaceLandmarks.convert(l.getType()).toString() + " at " + l.getPosition());
+//                /* Positions of facial features + Enum class */
+//            }
+
         }
-        imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
+
+        //imageView.setImageBitmap(input);
+        //imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
+    }
+
+    private Bitmap adjustContourColor(Contour contour) {
+        Bitmap input = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        Bitmap bmOut = input.copy(Bitmap.Config.ARGB_8888, true);
+
+        Canvas canvas = new Canvas(bmOut);
+
+        Paint myPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        //myPaint.setColor(Color.parseColor("#99ff0000"));
+        myPaint.setColor(getColorWithAlpha(Color.RED, 0.4f));
+
+        Path path = new Path();
+        path.moveTo(contour.getPositions()[0].x, contour.getPositions()[0].y);
+
+        for (PointF point : contour.getPositions()) {
+            path.lineTo(point.x, point.y);
+            Log.d("IMG WORK ACTIVITY", "SET PIXELS: " + (int) point.x + " " + (int) point.y);
+        }
+
+        path.close();
+
+        canvas.drawPath(path, myPaint);
+
+        Log.d("IMG WORK ACTIVITY", bmOut.getWidth() + " " + bmOut.getHeight());
+
+        return bmOut;
+    }
+
+
+    // GETS TRANSPARENT COLOR loooool
+    private static int getColorWithAlpha(int color, float ratio) {
+        int newColor = 0;
+        int alpha = Math.round(Color.alpha(color) * ratio);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+        newColor = Color.argb(alpha, r, g, b);
+        return newColor;
     }
 }
