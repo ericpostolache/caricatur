@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
-
+import java.util.Random;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Contour;
 import com.google.android.gms.vision.face.Face;
@@ -232,6 +232,12 @@ public class ImageWorkActivity extends Activity {
 
         FaceDetector faceDetector = new FaceDetector.Builder(getApplicationContext())
                 .setTrackingEnabled(false)
+                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                .setMode(FaceDetector.SELFIE_MODE)
+                .build();
+
+        FaceDetector faceDetectorContours = new FaceDetector.Builder(getApplicationContext())
+                .setTrackingEnabled(false)
                 .setLandmarkType(FaceDetector.CONTOUR_LANDMARKS)
                 .setMode(FaceDetector.SELFIE_MODE)
                 .build();
@@ -245,16 +251,19 @@ public class ImageWorkActivity extends Activity {
 
         Frame frame = new Frame.Builder().setBitmap(input).build();
         SparseArray<Face> faces = faceDetector.detect(frame);
+        SparseArray<Face> facesContours = faceDetectorContours.detect(frame);
+
 
         for (int i = 0; i < faces.size(); i++) {
             Face thisFace = faces.valueAt(i);
+            Face thisFaceContours = facesContours.valueAt(i);
             float x1 = thisFace.getPosition().x;
             float y1 = thisFace.getPosition().y;
             float x2 = x1 + thisFace.getWidth();
             float y2 = y1 + thisFace.getHeight();
-            tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+            //tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
             ArrayList<Landmark> landmarks = new ArrayList<>(thisFace.getLandmarks());
-            ArrayList<Contour> contours = new ArrayList<>(thisFace.getContours());
+            ArrayList<Contour> contours = new ArrayList<>(thisFaceContours.getContours());
             Log.d("IMG WORK ACTIVITY", "Found this number of landmarks: " + landmarks.size());
             Log.d("IMG WORK ACTIVITY", "Found this number of contours: " + contours.size());
 
@@ -265,7 +274,41 @@ public class ImageWorkActivity extends Activity {
                 if (contour.getType() == Contour.RIGHT_EYE) {
                     imageView.setImageBitmap(adjustContourColor(contour));
                 }
+
+
             }
+
+
+            // OCHI PENTRU OCHI SI DINTE PENTRU DINTE
+            Random r = new Random();
+            boolean isLeftOpen = r.nextInt(2) % 2 == 1;
+            boolean isRightOpen = r.nextInt(2) % 2 == 1;
+
+            Landmark leftEye = null;
+            Landmark rightEye = null;
+            for (Landmark landmark : landmarks) {
+
+                if (landmark.getType() == Landmark.LEFT_EYE) {
+                    leftEye = landmark;
+                }
+
+                if (landmark.getType() == Landmark.RIGHT_EYE) {
+                    rightEye = landmark;
+                }
+
+            }
+
+            if (leftEye != null && rightEye != null) {
+                float distance = Math.abs(leftEye.getPosition().x - rightEye.getPosition().x);
+                Log.d("IMG WORK ACTIVIty", Float.toString(distance));
+
+                overlayEyeBitmap(tempCanvas, isLeftOpen, leftEye.getPosition().x, leftEye.getPosition().y, distance);
+                overlayEyeBitmap(tempCanvas, isRightOpen, rightEye.getPosition().x, rightEye.getPosition().y, distance);
+
+                imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
+
+            }
+
 
 //            for (Landmark l : landmarks) {
 //                int cx = (int) (l.getPosition().x * 1);
@@ -279,6 +322,37 @@ public class ImageWorkActivity extends Activity {
 
         //imageView.setImageBitmap(input);
         //imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
+    }
+
+    private static void overlayEyeBitmap(Canvas canvas, boolean eyeClosed, float cx, float cy, float eye_distance) {
+        float radius = eye_distance / 3;
+
+        // draw the eye's background circle with appropriate color
+        Paint paintFill = new Paint();
+        paintFill.setStyle(Paint.Style.FILL);
+        if (eyeClosed)
+            paintFill.setColor(Color.YELLOW);
+        else
+            paintFill.setColor(Color.WHITE);
+        canvas.drawCircle(cx, cy, radius, paintFill);
+
+        // draw a black border around the eye
+        Paint paintStroke = new Paint();
+        paintStroke.setColor(Color.BLACK);
+        paintStroke.setStyle(Paint.Style.STROKE);
+        paintStroke.setStrokeWidth(5);
+        canvas.drawCircle(cx, cy, radius, paintStroke);
+
+        if (eyeClosed)
+            // draw horizontal line across closed eye
+            canvas.drawLine(cx - radius, cy, cx + radius, cy, paintStroke);
+        else {
+            // draw big off-center pupil on open eye
+            paintFill.setColor(Color.BLACK);
+            float cxPupil = cx - 10;
+            float cyPupil = cy + 10;
+            canvas.drawCircle(cxPupil, cyPupil, radius / 2, paintFill);
+        }
     }
 
     private Bitmap adjustContourColor(Contour contour) {
