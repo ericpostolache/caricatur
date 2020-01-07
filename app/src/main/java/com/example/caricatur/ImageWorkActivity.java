@@ -1,5 +1,6 @@
 package com.example.caricatur;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +93,10 @@ public class ImageWorkActivity extends Activity {
         filterList.add(filter9);
         filterList.add(filter10);
 
+        final Button save = (Button) findViewById(R.id.save);
+        final Button reset = (Button) findViewById(R.id.reset);
+        final Button caricaturise = (Button) findViewById(R.id.caricaturiseBtn);
+        final HorizontalScrollView filterScrollList = (HorizontalScrollView) findViewById(R.id.filterScrollView);
 
         if (this.getIntent() != null && this.getIntent().getExtras() != null) {
             loadImageFromStorage((String) this.getIntent().getExtras().get("path"));
@@ -98,7 +104,7 @@ public class ImageWorkActivity extends Activity {
 
         for (int i = 0; i < 10; i++) {
             try {
-                filterList.get(i).setImageResource(R.drawable.image_filter);
+                //filterList.get(i).setImageResource(R.drawable.image_filter);
                 filterList.get(i).setImageBitmap(applyRandomFilter(i + 1));
                 int finalI = i;
                 filterList.get(i).setOnClickListener(click -> {
@@ -109,10 +115,6 @@ public class ImageWorkActivity extends Activity {
                 e.printStackTrace();
             }
         }
-
-        final Button save = (Button) findViewById(R.id.save);
-        final Button reset = (Button) findViewById(R.id.reset);
-        final TextView tv_saved = (TextView) findViewById(R.id.tv_saved);
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,7 +130,9 @@ public class ImageWorkActivity extends Activity {
                         "Image of bird"
                 );
 
-                tv_saved.setText("Image saved to gallery.\n");
+                Toast.makeText(ImageWorkActivity.this, "Image saved to gallery!!",
+                        Toast.LENGTH_LONG).show();
+
 
                 CountDownTimer timer = new CountDownTimer(1500, 500) {
 
@@ -138,8 +142,6 @@ public class ImageWorkActivity extends Activity {
 
                     @Override
                     public void onFinish() {
-                        tv_saved.setVisibility(View.INVISIBLE);
-
                         goToMainActivity();
                     }
                 }.start();
@@ -151,6 +153,17 @@ public class ImageWorkActivity extends Activity {
             public void onClick(View v) {
                 // Get the image from drawable resource as drawable object
                 imageView.setImageBitmap(originalImageBitmap);
+                filterScrollList.setVisibility(View.VISIBLE);
+                caricaturise.setVisibility(View.VISIBLE);
+            }
+        });
+
+        caricaturise.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filterScrollList.setVisibility(View.GONE);
+                caricaturise.setVisibility(View.GONE);
+                faceDetection(((BitmapDrawable) imageView.getDrawable()).getBitmap());
             }
         });
     }
@@ -182,30 +195,16 @@ public class ImageWorkActivity extends Activity {
             Bitmap b = BitmapFactory.decodeStream(new FileInputStream(file));
             imageView.setImageBitmap(b);
             originalImageBitmap = b;
-            faceDetection(b);
+//            faceDetection(b);
 //            applyRandomFilter(b);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-//    /* applies a random filter from list */
-//    private void applyRandomFilter(Bitmap input) {
-//
-//        Random rand = new Random();
-//
-//        input = input.copy( Bitmap.Config.ARGB_8888 , true);
-//        filters = FilterPack.getFilterPack(getBaseContext());
-//        Filter filter = filters.get(rand.nextInt(filters.size()));
-//        Bitmap output = filter.processFilter(input);
-//        output = output.copy( Bitmap.Config.ARGB_8888 , true);
-//
-//        imageView.setImageBitmap(output);
-//    }
-
     /* applies a random filter from list */
     private Bitmap applyRandomFilter(int i) throws FileNotFoundException {
-        Bitmap input = ((BitmapDrawable) filterList.get(i - 1).getDrawable()).getBitmap();
+        Bitmap input = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
         input = input.copy(Bitmap.Config.ARGB_8888, true);
         filters = FilterPack.getFilterPack(getBaseContext());
@@ -254,6 +253,8 @@ public class ImageWorkActivity extends Activity {
         SparseArray<Face> facesContours = faceDetectorContours.detect(frame);
 
 
+        Log.d("IMG WORK ACTIVITY", "Found this number of faces: " + faces.size());
+
         for (int i = 0; i < faces.size(); i++) {
             Face thisFace = faces.valueAt(i);
             Face thisFaceContours = facesContours.valueAt(i);
@@ -261,23 +262,10 @@ public class ImageWorkActivity extends Activity {
             float y1 = thisFace.getPosition().y;
             float x2 = x1 + thisFace.getWidth();
             float y2 = y1 + thisFace.getHeight();
-            //tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
             ArrayList<Landmark> landmarks = new ArrayList<>(thisFace.getLandmarks());
             ArrayList<Contour> contours = new ArrayList<>(thisFaceContours.getContours());
             Log.d("IMG WORK ACTIVITY", "Found this number of landmarks: " + landmarks.size());
             Log.d("IMG WORK ACTIVITY", "Found this number of contours: " + contours.size());
-
-            for (Contour contour : contours) {
-                if (contour.getType() == Contour.LEFT_EYE) {
-                    imageView.setImageBitmap(adjustContourColor(contour));
-                }
-                if (contour.getType() == Contour.RIGHT_EYE) {
-                    imageView.setImageBitmap(adjustContourColor(contour));
-                }
-
-
-            }
-
 
             // OCHI PENTRU OCHI SI DINTE PENTRU DINTE
             Random r = new Random();
@@ -300,7 +288,7 @@ public class ImageWorkActivity extends Activity {
 
             if (leftEye != null && rightEye != null) {
                 float distance = Math.abs(leftEye.getPosition().x - rightEye.getPosition().x);
-                Log.d("IMG WORK ACTIVIty", Float.toString(distance));
+                Log.d("IMG WORK ACTIVITY", Float.toString(distance));
 
                 overlayEyeBitmap(tempCanvas, isLeftOpen, leftEye.getPosition().x, leftEye.getPosition().y, distance);
                 overlayEyeBitmap(tempCanvas, isRightOpen, rightEye.getPosition().x, rightEye.getPosition().y, distance);
@@ -309,19 +297,32 @@ public class ImageWorkActivity extends Activity {
 
             }
 
-
-//            for (Landmark l : landmarks) {
-//                int cx = (int) (l.getPosition().x * 1);
-//                int cy = (int) (l.getPosition().y * 1);
-//                //tempCanvas.drawCircle(cx, cy, 10, myRectPaint);
-//                Log.d("IMG WORK ACTIVITY", FaceLandmarks.convert(l.getType()).toString() + " at " + l.getPosition());
-//                /* Positions of facial features + Enum class */
-//            }
+            int colorLips = r.nextInt(3);
+            int color;
+            if (colorLips == 0) {
+                color = Color.RED;
+            } else if (colorLips == 1) {
+                color = Color.BLUE;
+            } else {
+                color = Color.GREEN;
+            }
+            // COLOR THE SHITTTT
+            for (Contour contour : contours) {
+                if (contour.getType() == Contour.LOWER_LIP_TOP) {
+                    imageView.setImageBitmap(adjustContourColor(contour, color));
+                }
+                if (contour.getType() == Contour.LOWER_LIP_BOTTOM) {
+                    imageView.setImageBitmap(adjustContourColor(contour, color));
+                }
+                if (contour.getType() == Contour.UPPER_LIP_BOTTOM) {
+                    imageView.setImageBitmap(adjustContourColor(contour, color));
+                }
+                if (contour.getType() == Contour.UPPER_LIP_TOP) {
+                    imageView.setImageBitmap(adjustContourColor(contour, color));
+                }
+            }
 
         }
-
-        //imageView.setImageBitmap(input);
-        //imageView.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
     }
 
     private static void overlayEyeBitmap(Canvas canvas, boolean eyeClosed, float cx, float cy, float eye_distance) {
@@ -355,7 +356,7 @@ public class ImageWorkActivity extends Activity {
         }
     }
 
-    private Bitmap adjustContourColor(Contour contour) {
+    private Bitmap adjustContourColor(Contour contour, int color) {
         Bitmap input = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
         Bitmap bmOut = input.copy(Bitmap.Config.ARGB_8888, true);
 
@@ -363,7 +364,7 @@ public class ImageWorkActivity extends Activity {
 
         Paint myPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         //myPaint.setColor(Color.parseColor("#99ff0000"));
-        myPaint.setColor(getColorWithAlpha(Color.RED, 0.4f));
+        myPaint.setColor(getColorWithAlpha(color, 0.4f));
 
         Path path = new Path();
         path.moveTo(contour.getPositions()[0].x, contour.getPositions()[0].y);
