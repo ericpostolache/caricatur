@@ -11,7 +11,8 @@
 
 
 
-    <application>
+    <application
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:label="Caricatur"
             android:name=".MainActivity" >
