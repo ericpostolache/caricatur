@@ -11,6 +11,20 @@
         android:layout_above="@+id/filterScrollView"
         android:contentDescription="Time to caricaturize!"/>
 
+    <Button
+        android:id="@+id/caricaturiseBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Caricaturise"
+        android:clickable="true"
+        android:background="@drawable/button1"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/filterScrollView"
+        android:layout_marginBottom="10dp"
+    />
+
     <HorizontalScrollView
         android:id="@+id/filterScrollView"
         android:layout_width="match_parent"

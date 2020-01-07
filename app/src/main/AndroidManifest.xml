@@ -13,7 +13,7 @@
 
     <application>
         <activity
-            android:label="Logo"
+            android:label="Caricatur"
             android:name=".MainActivity" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +22,7 @@
         </activity>
 
         <activity
-            android:label="Logo"
+            android:label="Caricatur"
             android:name=".ImageWorkActivity" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
