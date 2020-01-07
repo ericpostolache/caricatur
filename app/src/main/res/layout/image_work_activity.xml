@@ -22,7 +22,7 @@
         android:paddingRight="10dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@id/filterScrollView"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
     />
 
     <HorizontalScrollView
