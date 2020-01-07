@@ -23,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
+
             <ImageView
                 android:layout_marginLeft="10dp"
                 android:layout_width="100dp"
@@ -75,6 +76,7 @@
                 android:id="@+id/filter10"/>
 
         </LinearLayout>
+
     </HorizontalScrollView>
 
 <!--    <Button-->
@@ -109,31 +111,49 @@
 <!--        android:text="Reset"-->
 <!--        android:textSize="20dp" />-->
 
-    <Button
-        android:id="@+id/save"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save Image To Gallery"
-        />
+        android:orientation="horizontal"
+        android:id="@+id/rlayout1"
+        >
 
-    <Button
-        android:id="@+id/reset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@id/save"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="-211dp"
-        android:text="Reset" />
+        <Button
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Image To Gallery"
+            android:background="@drawable/button1"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="7dp"
+            />
 
-    <TextView
-        android:id="@+id/tv_saved"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/save"
-        android:layout_alignLeft="@id/save"
-        android:layout_marginLeft="143dp"
-        android:layout_marginTop="288dp"
-        android:background="#FFFFFF"
-        android:textColor="#000000" />
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@id/save"
+            android:text="Reset"
+            android:background="@drawable/button1"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="7dp"
+            />
+
+
+        <TextView
+            android:id="@+id/tv_saved"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/save"
+            android:layout_alignLeft="@id/save"
+            android:layout_alignTop="@id/save"
+            android:layout_marginLeft="143dp"
+            android:layout_marginTop="288dp"
+            android:background="#FFFFFF"
+            android:textColor="#000000" />
+
+    </RelativeLayout>
 
 </RelativeLayout>
