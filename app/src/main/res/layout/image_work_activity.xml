@@ -76,4 +76,64 @@
 
         </LinearLayout>
     </HorizontalScrollView>
+
+<!--    <Button-->
+<!--        android:id="@+id/button_save"-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="50dp"-->
+<!--        android:onClick="saveImageToDeviceStorage"-->
+<!--        android:text="Save"-->
+<!--        android:background="@drawable/button1"-->
+<!--        android:clickable="true"-->
+<!--        android:paddingTop="2dp"-->
+<!--        android:paddingBottom="5dp"-->
+<!--        android:textSize="20dp"-->
+<!--        android:paddingLeft="5dp"-->
+<!--        android:paddingRight="5dp"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:layout_gravity="center_horizontal"/>-->
+
+<!--    <Button-->
+<!--        android:id="@+id/button_reset"-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="50dp"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:background="@drawable/button1"-->
+<!--        android:clickable="true"-->
+<!--        android:onClick="takePicture"-->
+<!--        android:paddingLeft="5dp"-->
+<!--        android:paddingTop="2dp"-->
+<!--        android:paddingRight="5dp"-->
+<!--        android:paddingBottom="5dp"-->
+<!--        android:text="Reset"-->
+<!--        android:textSize="20dp" />-->
+
+    <Button
+        android:id="@+id/save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save Image To Gallery"
+        />
+
+    <Button
+        android:id="@+id/reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/save"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="-211dp"
+        android:text="Reset" />
+
+    <TextView
+        android:id="@+id/tv_saved"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/save"
+        android:layout_alignLeft="@id/save"
+        android:layout_marginLeft="143dp"
+        android:layout_marginTop="288dp"
+        android:background="#FFFFFF"
+        android:textColor="#000000" />
+
 </RelativeLayout>

@@ -1,8 +1,8 @@
 package com.example.caricatur;
 
 import android.app.Activity;
-import android.app.Application;
-import android.content.res.AssetManager;
+
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,17 +12,17 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.os.Bundle;
-import android.util.AttributeSet;
+import android.os.CountDownTimer;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Contour;
@@ -32,13 +32,13 @@ import com.google.android.gms.vision.face.Landmark;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class ImageWorkActivity extends Activity {
 
@@ -62,6 +62,7 @@ public class ImageWorkActivity extends Activity {
     List<Filter> filters;
     List<ImageView> filterList = new ArrayList<>();
     Bitmap originalImageBitmap;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,6 +110,56 @@ public class ImageWorkActivity extends Activity {
             }
         }
 
+        final Button save = (Button) findViewById(R.id.save);
+        final Button reset = (Button) findViewById(R.id.reset);
+        final TextView tv_saved = (TextView) findViewById(R.id.tv_saved);
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Get the image from drawable resource as drawable object
+                Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+
+                // Save image to gallery
+                MediaStore.Images.Media.insertImage(
+                        getContentResolver(),
+                        bitmap,
+                        "Bird",
+                        "Image of bird"
+                );
+
+                tv_saved.setText("Image saved to gallery.\n");
+
+                CountDownTimer timer = new CountDownTimer(1500, 500) {
+
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        tv_saved.setVisibility(View.INVISIBLE);
+
+                        goToMainActivity();
+                    }
+                }.start();
+            }
+        });
+
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Get the image from drawable resource as drawable object
+                imageView.setImageBitmap(originalImageBitmap);
+            }
+        });
+    }
+
+    public void goToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+
+        intent.putExtra(EXTRA_MESSAGE, "Main Activity");
+        startActivity(intent);
     }
 
     private Bitmap applyRandomFilterOnImage(int i) {
